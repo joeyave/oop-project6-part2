@@ -1,25 +1,26 @@
-#include "src/ServiceProvider.h"
-#include "src/Car.h"
-#include "src/CarDao.h"
+#include "src/Account.h"
+#include "src/AccountDao.h"
 #include <fstream>
 #include <iostream>
-#include <pqxx/pqxx>
 
 int main() {
     try {
-        Car car1("McLaren P1", "yellow", 0);
+        AccountDao alice;
+        auto aliceTransaction = alice.getById(1);
+        Account aliceAccount(aliceTransaction[0].as<int>(),
+                             aliceTransaction[1].as<int>(),
+                             aliceTransaction[2].as<int>());
+        aliceAccount.setBalance(aliceAccount.getBalance() - 20);
 
-        CarDao carDao;
-        //carDao.insert(car1);
-        auto cars = carDao.getAll();
+        AccountDao bob;
+        auto bobTransaction = bob.getById(1);
+        Account bobAccount(bobTransaction[0].as<int>(),
+                           bobTransaction[1].as<int>(),
+                           bobTransaction[2].as<int>());
+        bobAccount.setBalance(bobAccount.getBalance() - 40);
 
-        // Print table.
-        for (const auto& row : cars) {
-            for (const auto& col : row) {
-                std::cout << col.c_str() << '\t';
-            }
-            std::cout << '\n';
-        }
+        bob.update(bobAccount);
+        alice.update(aliceAccount);
     }
     catch (std::exception const& e) {
         std::cerr << e.what() << '\n';
